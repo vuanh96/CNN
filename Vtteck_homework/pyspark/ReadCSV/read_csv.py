@@ -23,7 +23,8 @@ schema = StructType([
     StructField("DurationVoice", IntegerType())
 ])
 
-df = spark.read.csv('All_User*.csv', sep=',', schema=schema, header=True)
+data_dir = 'datasource'
+df = spark.read.csv(data_dir + '/' + 'All_User*.csv', sep=',', schema=schema, header=True)
 print(df.count())
 # df.show()
 # df.describe().show()

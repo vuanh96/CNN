@@ -1,7 +1,9 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.types import *
-from pyspark.ml.linalg import SparseVector, DenseVector
-from scipy.sparse import csr_matrix
+from pyspark.ml.linalg import SparseVector
+from scipy.sparse import csr_matrix, vstack, save_npz
+from operator import attrgetter
+import numpy as np
 import time
 
 s = time.time()
@@ -34,11 +36,12 @@ df.show()
 
 # Determine max values of VolData, NoSMS, DurationVoice
 # option 1:
-max_values = df.groupBy().max('VolData', 'NoSMS', 'DurationVoice').collect()[0]
+max_values = df.groupBy().max('VolData', 'NoSMS', 'DurationVoice', 'WEEK').collect()[0]
+n_weeks = max_values[3] + 1
 
 # option 2:
 # df.createOrReplaceTempView('user')
-# max_values = spark.sql('MAX(VolData), MAX(NoSMS), MAX(DurationVoice) FROM user').collect()[0]
+# max_values = spark.sql('SELECT MAX(VolData), MAX(NoSMS), MAX(DurationVoice) FROM user').collect()[0]
 
 print(max_values)
 
@@ -77,29 +80,27 @@ rdd = df.rdd.map(lambda x: parse(x))
 # concatenate values (concatenate list of (idx, val)) to sparse vector
 rdd = rdd.reduceByKey(lambda a, b: a + b)
 # create features is sparse vector
-rdd = rdd.map(lambda x: (x[0][0], x[0][1], DenseVector(SparseVector(24 * 7 * n_features, x[1]))))
+rdd = rdd.map(lambda x: (x[0][0], x[0][1], SparseVector(24 * 7 * n_features, x[1])))
+
+# write features to csv file by week
+df = spark.createDataFrame(rdd, ['ID_USER', 'WEEK', 'FEATURES'])
+df.show()
 
 
+def as_matrix(vec):
+    data, indices = vec.values, vec.indices
+    shape = 1, vec.size
+    return csr_matrix((data, indices, np.array([0, data.size])), shape)
 
-final_df = spark.createDataFrame(rdd, ['ID_USER', 'WEEK', 'FEATURES']).select('FEATURES')
-final_df.show()
 
-# write input to csv file
-final_df.toPandas().to_csv('input.csv', index=False)
+for week in [1]:
+    features = df.filter(df['WEEK'] == week).rdd.map(lambda x: x['FEATURES'])
+    mats = features.map(as_matrix)
+    mat = mats.reduce(lambda x, y: vstack([x, y]))
+    save_npz('data/preprocessed/inputs_week' + str(week) + '.npz', mat)
+
 
 spark.stop()
 
 e = time.time()
 print("Time: %f s" % (e - s))
-
-
-# class Preprocess:
-#     def __init__(self, data_dir):
-#         self
-#
-#     def run(self):
-#         # Initialize spark session
-#         spark = SparkSession \
-#             .builder \
-#             .appName("read_csv") \
-#             .getOrCreate()
