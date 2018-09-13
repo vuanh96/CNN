@@ -2,7 +2,6 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import *
 from pyspark.ml.linalg import SparseVector
 from scipy.sparse import csr_matrix, vstack, save_npz
-from operator import attrgetter
 import numpy as np
 import time
 

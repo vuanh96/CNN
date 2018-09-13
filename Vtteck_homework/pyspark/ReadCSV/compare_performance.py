@@ -29,8 +29,8 @@ schema = StructType([
 data_dir = 'datasource'
 
 # Read csv file to dataframe
-df = spark.read.csv(data_dir + '/' + '*.csv', sep=',', header=True, schema=schema)
-rdd = df.rdd.map(lambda x: x)
+df = spark.read.csv(data_dir + '/' + '*.csv', sep=',', header=True, schema=schema).na.drop()
+rdd = df.rdd
 df.show()
 
 # ---------------------DataFrame1------------------------
