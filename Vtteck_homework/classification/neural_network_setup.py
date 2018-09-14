@@ -45,16 +45,19 @@ for i in range(1, n_layers):
 Y = convert_labels(y, C)
 N = X.shape[1]
 eta = 1  # learning rate
-Z = [0]
-A = [X]
+Z = [0] * n_layers
+A = [0] * n_layers
 for it in range(10000):
     # Feedforward
     for i in range(1, n_layers):
-        Z.append(np.dot(W[i].T, A[i - 1]) + b[i])
-        if i != n_layers - 1:
-            A.append(np.maximum(Z[i], 0))
+        if i == 1:
+            Z[i] = np.dot(W[i].T, X) + b[i]
         else:
-            A.append(softmax(Z[i]))
+            Z[i] = np.dot(W[i].T, A[i-1]) + b[i]
+        if i != n_layers - 1:
+            A[i] = np.maximum(Z[i], 0)
+        else:
+            A[i] = softmax(Z[i])
     Yhat = A[n_layers - 1]
 
     # print loss after each 1000 iterations
