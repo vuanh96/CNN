@@ -1,7 +1,8 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.types import *
-from pyspark.sql.functions import max
+from pyspark.sql.functions import max, min
 import time
+import numpy as np
 
 # ------------------Compare performance some ways to find max of columns in pyspark-------------------------------
 
@@ -26,17 +27,18 @@ schema = StructType([
     StructField("DurationVoice", IntegerType())
 ])
 
-data_dir = 'datasource'
+data_dir = 'data'
+columns = ['VolData', 'NoSMS', 'DurationVoice']
 
 # Read csv file to dataframe
-df = spark.read.csv(data_dir + '/' + '*.csv', sep=',', header=True, schema=schema).na.drop()
+df = spark.read.csv(data_dir + '/' + '*.csv', sep=',', header=True, schema=schema).dropna()
 rdd = df.rdd
 df.show()
 
 # ---------------------DataFrame1------------------------
 s = time.time()
 # Determine max values of VolData, NoSMS, DurationVoice
-max_values = df.groupBy().max('VolData', 'NoSMS', 'DurationVoice', 'WEEK').collect()[0]
+max_values = df.groupBy().max('VolData', 'NoSMS', 'DurationVoice').collect()[0]
 print(max_values)
 
 e1 = time.time()
@@ -44,7 +46,7 @@ print("DF1 - Time: %f s" % (e1 - s))
 # ---------------------DataFrame2------------------------
 # Determine max values of VolData, NoSMS, DurationVoice
 max_values = []
-for feature in ['VolData', 'NoSMS', 'DurationVoice']:
+for feature in columns:
     max_values.append(df.groupBy().max(feature).collect()[0][0])
 print(max_values)
 
@@ -53,7 +55,7 @@ print("DF2 - Time: %f s" % (e2 - e1))
 
 # ---------------------DataFrame3--------------------------
 # Determine max values of VolData, NoSMS, DurationVoice
-max_values = df.select(max('VolData'), max('NoSMS'), max('DurationVoice')).collect()[0]
+max_values = df.select([max(c) for c in columns]).collect()[0]
 print(max_values)
 
 e3 = time.time()
@@ -70,7 +72,7 @@ print("DF4 - Time: %f s" % (e4 - e3))
 
 # -----------------------RDD------------------------------
 max_values = []
-for feature in ['VolData', 'NoSMS', 'DurationVoice']:
+for feature in columns:
     max_values.append(rdd.max(key=lambda x: x[feature])[feature])
 n_weeks = rdd.max(key=lambda x: x['WEEK'])['WEEK']
 print(max_values)

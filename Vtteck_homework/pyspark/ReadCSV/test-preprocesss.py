@@ -1,14 +1,13 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.types import *
-from pyspark.ml.linalg import SparseVector, SparseMatrix
+from pyspark.ml.linalg import SparseMatrix
 from scipy.sparse import csr_matrix, vstack, save_npz
 import numpy as np
 import time
 
 """
-    DONE!
+    DONE
 """
-
 
 class Preprocess:
     def __init__(self, data_dir, output_dir, features, schema=None, header=False, use_sparse_matrix_pyspark=False):
@@ -30,29 +29,17 @@ class Preprocess:
         :return: (key, value)
         """
         key = (row['ID_USER'], row['WEEK'])
-        value = []
+        indices = []
+        values = []
         for i, feature in enumerate(self.features):
             if row[feature] != 0:
-                value += [(2 * self.n_features * row['DoW'] + self.n_features * row['HOUR'] + i, row[feature])]
-        return key, value
+                values += [row[feature]]
+                indices += [2 * self.n_features * (row['DoW'] - 1) + self.n_features * row['HOUR'] + i]
 
-    def to_csr_matrix(self, vec):
-        """
-        convert spark sparse vectors to scipy csr_matrix
-        """
-        data, indices = vec.values, vec.indices
-        shape = 1, vec.size
-        return csr_matrix((data, indices, [0, data.size]), shape)
+        return key, (values, indices)
 
     def save_csc_npz(self, row):
         save_npz(self.output_dir + '/inputs_week' + str(row[0]) + '.npz', row[1].tocsc())
-
-    def to_csr_matrix_pyspark(self, vec):
-        """
-        convert spark sparse vectors to spark csr_matrix
-        """
-        data, indices = vec.values, vec.indices
-        return SparseMatrix(1, vec.size, [0, data.size], indices, data, True)
 
     def vstack_pyspark(self, mats):
         """
@@ -74,20 +61,19 @@ class Preprocess:
         # 1. Initialize spark session
         spark = SparkSession \
             .builder \
-            .appName("read_csv") \
+            .appName("preprocess") \
             .getOrCreate()
 
         # 2. Read csv file to dataframe
-        df = spark.read.csv(self.data_dir + '/' + '*.csv', sep=',', header=self.header, schema=self.schema)
-        df = df.na.drop()  # drop rows have columns is null
+        df = spark.read.csv(self.data_dir + '/' + '*.csv', sep=',', header=self.header, schema=self.schema).dropna()
         df.show()
 
         # 3. Determine max values of features
-        df.createOrReplaceTempView('cdr')
+        df.createOrReplaceTempView('preprocess')
         sql_querry = 'SELECT '
         for feature in self.features:
             sql_querry += 'max(%s), min(%s), ' % (feature, feature)
-        sql_querry += 'max(week) FROM cdr '
+        sql_querry += 'max(week) FROM preprocess '
         aggs = spark.sql(sql_querry).collect()[0]
         max_values = aggs[0:-1:2]
         min_values = aggs[1:-1:2]
@@ -104,23 +90,26 @@ class Preprocess:
         df.show()
 
         # 5. Group by (id_user, week) and create sparse feature vector
-        # map each record x to (key, value) with function parse()
+        # map each record x to (key, (values, indices) with function parse()
         rdd = df.rdd.map(lambda x: self.parse(x))
-        # concatenate values (concatenate list of (idx, val)) to sparse vector
-        rdd = rdd.reduceByKey(lambda a, b: a + b)
-        # create features is sparse vector
-        rdd = rdd.map(lambda x: (x[0][1], SparseVector(2 * 2 * self.n_features, x[1])))
+        # concatenate values (concatenate list of values and indices) to sparse vector
+        rdd = rdd.reduceByKey(lambda a, b: (a[0] + b[0], a[1] + b[1]))
 
-        # print scipy sparse matrix
-        mats = rdd.mapValues(self.to_csr_matrix).reduceByKey(lambda x, y: vstack([x, y]))
+        # rows = (week, csr_matrix_scipy of week)
+        mats = rdd.map(lambda x: [x[0][1], csr_matrix((x[1][0], x[1][1], [0, len(x[1][0])]),
+                                                      shape=(1, 2 * 2 * self.n_features))])
+        mats = mats.reduceByKey(lambda x, y: vstack([x, y]))
         mats.foreach(lambda x: print(x[0], ' : ', x[1].toarray()))
-        mats_pyspark = rdd.mapValues(self.to_csr_matrix_pyspark).reduceByKey(lambda x, y: self.vstack_pyspark([x, y]))
-        mats_pyspark.foreach(lambda x: print(x[0], ' : ', x[1].toArray()))
+        # rows = (week, csr_matrix_pyspark of week)
+        mats = rdd.map(lambda x: (x[0][1], SparseMatrix(1, 2 * 2 * self.n_features, [0, len(x[1][0])], x[1][1], x[1][0], True)))
+        mats = mats.reduceByKey(lambda x, y: self.vstack_pyspark([x, y]))
+        mats.foreach(lambda x: print(x[0], ' : ', x[1].toArray()))
 
         spark.stop()
 
 
 if __name__ == '__main__':
+
     s = time.time()
 
     schema = StructType([
@@ -137,10 +126,9 @@ if __name__ == '__main__':
         StructField("NoSMS", IntegerType()),
         StructField("DurationVoice", IntegerType())
     ])
-    pre = Preprocess(data_dir='datasource', output_dir='data/preprocessed', schema=schema, header=True,
+    pre = Preprocess(data_dir='data', output_dir='', schema=schema, header=True,
                      features=['DurationVoice'])
     pre.run()
+
     e = time.time()
     print("Time: %f s" % (e - s))
-
-# ********************DONE*********************
