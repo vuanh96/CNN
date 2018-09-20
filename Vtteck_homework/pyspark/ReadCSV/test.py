@@ -71,19 +71,19 @@ def parse(cols):
 
 df = df.withColumn('values-indices', parse(array(['DoW', 'HOUR'] + features)))
 df = df.select('ID_USER', 'WEEK', 'values-indices.*')
-df.show()
+df.show(truncate=False)
 
-# @pandas_udf(StructType([StructField('ID_USER', LongType()),
-#                         StructField('WEEK', IntegerType()),
-#                         StructField('values', ArrayType(FloatType())),
-#                         StructField('indices', ArrayType(FloatType()))]), PandasUDFType.GROUPED_MAP)
-# def concat(pdf):
-#     v = pdf.WEEK
-#     return pdf.assign(WEEK=(v - v.mean()) / v.std())
-#
-#
-# df = df.groupBy('ID_USER').apply(concat)
-# df.show()
+@pandas_udf(StructType([StructField('ID_USER', LongType()),
+                        StructField('WEEK', IntegerType()),
+                        StructField('values', ArrayType(FloatType())),
+                        StructField('indices', ArrayType(FloatType()))]), PandasUDFType.GROUPED_MAP)
+def concat(pdf):
+    v = pdf.WEEK
+    return pdf.assign(WEEK=(v - v.mean()) / v.std())
+
+
+df = df.groupBy('ID_USER').apply(concat)
+df.show()
 rdd = df.rdd.map(lambda x: ((x[0], x[1]),(x[2],x[3])))
 rdd = rdd.reduceByKey(lambda a, b: (a[0] + b[0], a[1] + b[1]))
 mats = rdd.map(lambda x: (x[0][1], csr_matrix((x[1][0], x[1][1], [0, len(x[1][0])]),

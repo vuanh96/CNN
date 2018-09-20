@@ -55,8 +55,9 @@ class Preprocess:
     def run(self):
         # 1. Initialize spark session
         spark = SparkSession \
-            .builder \
-            .appName("preprocess") \
+            .builder\
+            .master('local[*]') \
+            .appName('preprocess') \
             .getOrCreate()
 
         # 2. Read csv file to dataframe
@@ -91,7 +92,6 @@ class Preprocess:
             mats = rdd.map(lambda x: (x[0][1], csr_matrix((x[1][0], x[1][1], [0, len(x[1][0])]),
                                                           shape=(1, 24 * 7 * self.n_features))))
             mats = mats.reduceByKey(lambda x, y: vstack([x, y]))
-            print('Time: %f s' % (time.time()-s))
             mats.foreach(self.save_csr_npz)
         else:
             # rows = (week, csr_matrix_pyspark of week)
