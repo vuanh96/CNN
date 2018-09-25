@@ -33,23 +33,32 @@ class Preprocess:
 
         return key, (values, indices)
 
+    def to_csr_matrix(self, pairs):
+        data = []
+        indices = []
+        idxptr = [0]
+        shape = len(pairs), 24*7*self.n_features
+        for vals, idxs in pairs:
+            data += vals
+            indices += idxs
+            idxptr.append(idxptr[-1] + len(vals))
+
+        return csr_matrix((data, indices, idxptr), shape=shape)
+
     def save_csr_npz(self, row):
         save_npz(self.output_dir + '/inputs_week' + str(row[0]) + '.npz', row[1])
 
-    def vstack_pyspark(self, mats):
-        """
-        Stack sparse matrices vertically
-        """
-        n_rows = 0
-        n_cols = mats[0].numCols
-        row_ptrs = [0]
-        col_indices = []
+    def to_csr_matrix_pyspark(self, pairs):
+        n_rows = len(pairs)
+        n_cols = 24*7*self.n_features
         values = []
-        for mat in mats:
-            n_rows += mat.numRows
-            row_ptrs = np.concatenate((row_ptrs, mat.colPtrs[1:] + row_ptrs[-1]))
-            col_indices = np.concatenate((col_indices, mat.rowIndices))
-            values = np.concatenate((values, mat.values))
+        col_indices = []
+        row_ptrs = [0]
+        for vals, idxs in pairs:
+            values += vals
+            col_indices += idxs
+            row_ptrs.append(row_ptrs[-1] + len(vals))
+
         return SparseMatrix(n_rows, n_cols, row_ptrs, col_indices, values, True)
 
     def run(self):
@@ -81,22 +90,22 @@ class Preprocess:
         df.show()
 
         # 5. Group by (id_user, week) and create sparse feature vector
-        # map each record x to (key, (values, indices) with function parse()
-        rdd = df.rdd.map(lambda x: self.parse(x))
-        # concatenate values (concatenate list of values and indices) to sparse vector
+        rdd = df.rdd.map(lambda x: self.parse(x))  # ((id_user, week), (values, indices))
+        # concatenate of values and indices by key
         rdd = rdd.reduceByKey(lambda a, b: (a[0] + b[0], a[1] + b[1]))
+        rdd = rdd.map(lambda x: (x[0][1], x[1]))  # (week, (values, indices))
 
         # write features to csv file by week
         if not self.use_sparse_matrix_pyspark:
             # rows = (week, csr_matrix_scipy of week)
-            mats = rdd.map(lambda x: (x[0][1], csr_matrix((x[1][0], x[1][1], [0, len(x[1][0])]),
-                                                          shape=(1, 24 * 7 * self.n_features))))
-            mats = mats.reduceByKey(lambda x, y: vstack([x, y]))
+            # mats = rdd.map(lambda x: (x[0][1], csr_matrix((x[1][0], x[1][1], [0, len(x[1][0])]),
+            #                                               shape=(1, 24 * 7 * self.n_features))))
+            # mats = mats.reduceByKey(lambda x, y: vstack([x, y]))
+            mats = rdd.groupByKey().mapValues(self.to_csr_matrix)
             mats.foreach(self.save_csr_npz)
         else:
             # rows = (week, csr_matrix_pyspark of week)
-            mats = rdd.map(lambda x: (x[0][1], SparseMatrix(1, 24 * 7 * self.n_features, [0, len(x[1][0])], x[1][1], x[1][0], True)))
-            mats = mats.reduceByKey(lambda x, y: self.vstack_pyspark([x, y]))
+            mats = rdd.groupByKey().mapValues(self.to_csr_matrix_pyspark)
             mats.foreach(lambda x: print(x[0], ' : ', x[1].toArray()))
 
         spark.stop()
