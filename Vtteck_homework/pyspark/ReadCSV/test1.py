@@ -1,22 +1,12 @@
-# from pyspark.sql import SparkSession
-# from pyspark.sql.types import *
-# from pyspark.ml.linalg import SparseVector, Vectors, VectorUDT, DenseVector
-# from scipy.sparse import csr_matrix, vstack, save_npz
-# import numpy as np
-# from pyspark.sql.functions import udf, sum, array, explode, collect_list, pandas_udf, PandasUDFType, max
-# import time
-#
-# s = time.time()
-# # Initialize spark session
-# spark = SparkSession \
-#     .builder \
-#     .appName("read_csv") \
-#     .getOrCreate()
-#
-# rdd = spark.sparkContext.parallelize([(1,2), (1,4), (5, 6)])
-# print(rdd.groupByKey().collect())
-#
-# spark.stop()
-#
+import matplotlib.pyplot as plt
 
-print(list(range(1,100)))
+x = [1,20,50]
+y1 = [23,42.5,73.5]
+y2 = [34.6,386.8,904.6]
+
+plt.plot(x, y2, 'ro-', label='no persist')
+plt.plot(x, y1, 'bo-', label='cache()')
+plt.legend()
+plt.xlabel('Number of movies')
+plt.ylabel('Time (s)')
+plt.show()

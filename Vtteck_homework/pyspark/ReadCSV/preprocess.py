@@ -6,6 +6,7 @@ from pyspark.sql.functions import max, min
 import numpy as np
 import time
 
+# RUN: spark-submit --conf spark.python.worker.memory=1g preprocess.py
 
 class Preprocess:
     def __init__(self, data_dir, output_dir, features, schema=None, header=False, use_sparse_matrix_pyspark=False):
