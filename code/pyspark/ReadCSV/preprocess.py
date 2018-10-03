@@ -99,7 +99,7 @@ class Preprocess:
         # write features to csv file by week
         if not self.use_sparse_matrix_pyspark:
             # rows = (week, csr_matrix_scipy of week)
-            # mats = rdd.map(lambda x: (x[0][1], csr_matrix((x[1][0], x[1][1], [0, len(x[1][0])]),
+            # mats = rdd.map(lambda x: (x[0], csr_matrix((x[1][0], x[1][1], [0, len(x[1][0])]),
             #                                               shape=(1, 24 * 7 * self.n_features))))
             # mats = mats.reduceByKey(lambda x, y: vstack([x, y]))
             mats = rdd.groupByKey().mapValues(self.to_csr_matrix)
