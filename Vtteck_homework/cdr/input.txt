@@ -1,4 +1,0 @@
-    MSISDN       ARPU        RVE_DATA        VOL_DATA        RVE_VOICE       VOL_VOICE       CNT_VOICE       RVE_SMS     CNT_SMS
-0976832886         50              30              10               20              50               1             0           0
-0976832885         30              20               5                0               0               0            10           5
-0976832886         70              30              10               20              50               1            20           10
