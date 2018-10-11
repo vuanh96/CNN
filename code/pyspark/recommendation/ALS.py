@@ -12,8 +12,7 @@ spark = SparkSession \
         .getOrCreate()
 
 
-data_dir = 'ml-100k'
-lines = spark.read.text(data_dir + '/u.data').rdd
+lines = spark.read.text('ml-100k/u.data').rdd
 parts = lines.map(lambda row: row.value.split())
 ratingsRDD = parts.map(lambda p: Row(userId=int(p[0]), movieId=int(p[1]), rating=float(p[2])))
 ratings = spark.createDataFrame(ratingsRDD)
@@ -35,7 +34,7 @@ print("Root-mean-square error = " + str(rmse))
 
 # Save and load model
 # model.save('save_model/ALS/' + data_dir)
-# model = ALSModel.load('save_model/ALS/' + data_dir)
+# model = ALSModel.load('save_model/ALS/ml-100k')
 
 # # Generate top 10 movie recommendations for each use
 # userRecs = model.recommendForAllUsers(10)

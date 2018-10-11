@@ -12,8 +12,7 @@ spark = SparkSession \
 sc = spark.sparkContext
 
 # Load and parse the data
-data_dir = "ml-100k"
-data = sc.textFile(data_dir + '/u.data')
+data = sc.textFile('ml-100k/u.data')
 ratings = data.map(lambda l: l.split())\
     .map(lambda l: Rating(int(l[0]), int(l[1]), float(l[2])))
 
@@ -33,7 +32,7 @@ MSE = ratesAndPreds.map(lambda r: (r[1][0] - r[1][1])**2).mean()
 print("Mean Squared Error = " + str(MSE))
 
 # Save and load model
-# model.save(sc, "save_model/ALS_rdd/" + data_dir)
+# model.save(sc, "save_model/ALS_rdd/ml-100k")
 # sameModel = MatrixFactorizationModel.load(sc, "save_model/ALS_rdd/" + data_dir)
 
 e = time.time()
