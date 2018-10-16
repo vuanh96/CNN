@@ -33,7 +33,7 @@ rmse = evaluator.evaluate(predictions)
 print("Root-mean-square error = " + str(rmse))
 
 # Save and load model
-# model.save('save_model/ALS/' + data_dir)
+# model.save('save_model_ALS/ALS/' + data_dir)
 # model = ALSModel.load('save_model/ALS/ml-100k')
 
 # # Generate top 10 movie recommendations for each use

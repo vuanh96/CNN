@@ -32,7 +32,7 @@ MSE = ratesAndPreds.map(lambda r: (r[1][0] - r[1][1])**2).mean()
 print("Mean Squared Error = " + str(MSE))
 
 # Save and load model
-# model.save(sc, "save_model/ALS_rdd/ml-100k")
+# model.save(sc, "save_model_ALS/ALS_rdd/ml-100k")
 # sameModel = MatrixFactorizationModel.load(sc, "save_model/ALS_rdd/" + data_dir)
 
 e = time.time()

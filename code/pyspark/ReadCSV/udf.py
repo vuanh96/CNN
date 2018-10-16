@@ -73,6 +73,7 @@ df = df.withColumn('values-indices', parse(array(['DoW', 'HOUR'] + features)))
 df = df.select('ID_USER', 'WEEK', 'values-indices.*')
 df.show(truncate=False)
 
+
 @pandas_udf(StructType([StructField('ID_USER', LongType()),
                         StructField('WEEK', IntegerType()),
                         StructField('values', ArrayType(FloatType())),
