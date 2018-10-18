@@ -56,18 +56,18 @@ spark = SparkSession \
 # Way 2:
 sparse_mat = load_npz('user_profiles/user_profiles.npz').tocoo()
 rows, cols, data = sparse_mat.row, sparse_mat.col, sparse_mat.data
-entries = spark.sparkContext.parallelize([MatrixEntry(rows[i], cols[i], data[i]) for i in range(len(data))]).persist()
+entries = spark.sparkContext.parallelize([MatrixEntry(rows[i], cols[i], data[i]) for i in range(len(data))])
 # Convert to CoordinateMatrix => RowMatrix
 mat = CoordinateMatrix(entries).transpose().toRowMatrix().persist()
 
 # Calculate exact and approximate similarities
-user_similarities = mat.columnSimilarities().entries.map(lambda r: (r.i, r.j, r.value)).persist()
+user_similarities = mat.columnSimilarities().entries.map(lambda r: ((r.i, r.j), r.value))
 
 # Output
-print("Have {} pairs user similarity: {} ...".format(user_similarities.count(), user_similarities.take(5)))
+# print("Have {} pairs user similarity: {} ...".format(user_similarities.count(), user_similarities.take(5)))
 
 # write user similarities
-user_similarities.saveAsTextFile("user_similarities_calculated_way2")
+user_similarities.sortByKey().saveAsTextFile("user_similarities_calculated_way2")
 
 # load user similarities
 # user_similarities_load = spark.sparkContext.textFile("user_similarities_calculated_way2")

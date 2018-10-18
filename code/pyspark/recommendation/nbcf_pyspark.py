@@ -1,5 +1,6 @@
 from math import sqrt
 import time
+from pyspark.mllib.linalg.distributed import CoordinateMatrix, MatrixEntry
 from pyspark.sql import SparkSession
 import numpy as np
 
@@ -28,7 +29,7 @@ if __name__ == '__main__':
     train = spark.sparkContext.textFile("ml-100k/ub.base")
 
     # movieID => userID, rating
-    train = train.map(lambda l: l.split()).map(lambda l: (int(l[1]), (int(l[0]), float(l[2])-1)))
+    train = train.map(lambda r: r.split()).map(lambda r: (int(r[1]), (int(r[0]), float(r[2]))))
 
     # Determine mean of ratings by user
     # movieID => mean
@@ -41,70 +42,77 @@ if __name__ == '__main__':
             return s / n
         return 0
 
-    means = train.groupByKey().mapValues(mean)
-    # sepOp = lambda x, y: (x[0]+y[1], x[1]+1)
-    # combOp = lambda x, y: (x[0]+y[0], x[1]+y[1])
-    # means = train.aggregateByKey((0, 0), sepOp, combOp).mapValues(lambda v: v[0]/v[1] if v[1] > 0 else 0)
+    # means = train.groupByKey().mapValues(mean)
+    sepOp = lambda x, y: (x[0]+y[1], x[1]+1)
+    combOp = lambda x, y: (x[0]+y[0], x[1]+y[1])
+    means = train.aggregateByKey((0, 0), sepOp, combOp).mapValues(lambda v: v[0]/v[1] if v[1] > 0 else 0)
 
     # userID => (movieID, rating_normalized)
     train = train.join(means).map(lambda l: (l[1][0][0], (l[0], l[1][0][1] - l[1][1])))
 
-    # userID => ((movie1, rating1), (movie2, rating2))
-    joinedRatings = train.join(train)
+    # # userID => (movieID, rating)
+    # train = train.map(lambda r: (r[1][0], (r[0], r[1][1])))
+    # # userID => ((movie1, rating1), (movie2, rating2))
+    # joinedRatings = train.join(train)
+    #
+    # # Filter out duplicate pairs
+    # def filterDuplicates(userRatings):
+    #     ratings = userRatings[1]
+    #     (movie1, rating1) = ratings[0]
+    #     (movie2, rating2) = ratings[1]
+    #     return movie1 < movie2
+    #
+    # uniqueJoinedRatings = joinedRatings.filter(filterDuplicates)
+    #
+    # # (movie1, movie2) = > (rating1, rating2)
+    # def makePairs(userRatings):
+    #     ratings = userRatings[1]
+    #     (movie1, rating1) = ratings[0]
+    #     (movie2, rating2) = ratings[1]
+    #     return (movie1, movie2), (rating1, rating2)
+    #
+    # moviePairs = uniqueJoinedRatings.map(makePairs)
+    #
+    # # (movie1, movie2) = > (rating1, rating2), (rating1, rating2) ...
+    # moviePairRatings = moviePairs.groupByKey()
+    #
+    # # Compute similarities
+    # # (movie1, movie2) => (similarity, numUserRated)
+    # def computeCosineSimilarity(ratingPairs):
+    #     numPairs = 0
+    #     sum_xx = sum_yy = sum_xy = 0
+    #     for ratingX, ratingY in ratingPairs:
+    #         sum_xx += ratingX * ratingX
+    #         sum_yy += ratingY * ratingY
+    #         sum_xy += ratingX * ratingY
+    #         numPairs += 1
+    #
+    #     numerator = sum_xy
+    #     denominator = sqrt(sum_xx) * sqrt(sum_yy)
+    #
+    #     score = 0
+    #     if denominator:
+    #         score = (numerator / (float(denominator)))
+    #
+    #     return score, numPairs
+    #
+    # moviePairSimilarities = moviePairRatings.mapValues(computeCosineSimilarity).cache()
 
-    # Filter out duplicate pairs
-    def filterDuplicates(userRatings):
-        ratings = userRatings[1]
-        (movie1, rating1) = ratings[0]
-        (movie2, rating2) = ratings[1]
-        return movie1 < movie2
+    entries = train.map(lambda r: MatrixEntry(r[0], r[1][0], r[1][1]))
+    # Convert to CoordinateMatrix => RowMatrix
+    mat = CoordinateMatrix(entries).toRowMatrix()
 
-    uniqueJoinedRatings = joinedRatings.filter(filterDuplicates)
-
-    # (movie1, movie2) = > (rating1, rating2)
-    def makePairs(userRatings):
-        ratings = userRatings[1]
-        (movie1, rating1) = ratings[0]
-        (movie2, rating2) = ratings[1]
-        return (movie1, movie2), (rating1, rating2)
-
-    moviePairs = uniqueJoinedRatings.map(makePairs)
-
-    # (movie1, movie2) = > (rating1, rating2), (rating1, rating2) ...
-    moviePairRatings = moviePairs.groupByKey()
-
-    # Compute similarities
-    # (movie1, movie2) => (similarity, numUserRated)
-    def computeCosineSimilarity(ratingPairs):
-        numPairs = 0
-        sum_xx = sum_yy = sum_xy = 0
-        for ratingX, ratingY in ratingPairs:
-            sum_xx += ratingX * ratingX
-            sum_yy += ratingY * ratingY
-            sum_xy += ratingX * ratingY
-            numPairs += 1
-
-        numerator = sum_xy
-        denominator = sqrt(sum_xx) * sqrt(sum_yy)
-
-        score = 0
-        if denominator:
-            score = (numerator / (float(denominator)))
-
-        return score, numPairs
-
-    moviePairSimilarities = moviePairRatings.mapValues(computeCosineSimilarity).cache()
-    print(moviePairSimilarities.filter(lambda r: r[0][0]==0 and r[0][1]==1).collect())
+    # Calculate exact and approximate similarities
+    moviePairSimilarities = mat.columnSimilarities().entries.map(lambda r: ((r.i, r.j), r.value))
 
     # Save the results if desired
-    # moviePairSimilarities.sortByKey()
-    # moviePairSimilarities.saveAsTextFile("movie-sims")
+    # moviePairSimilarities.sortByKey().saveAsTextFile("movie-sims")
 
     # Evaluate:
     # Load testing data
     test = spark.sparkContext.textFile('ml-100k/ub.test')
     # movieY => (userX, ratingXY)
-    test = test.map(lambda l: l.split()).map(lambda l: (int(l[1]), (int(l[0]), float(l[2])-1)))
+    test = test.map(lambda l: l.split()).map(lambda l: (int(l[1]), (int(l[0]), float(l[2]))))
     # Subtract rating to mean by movie
     # userX => (movieY, ratingXY)
     test = test.join(means).map(lambda l: (l[1][0][0], (l[0], l[1][0][1] - l[1][1])))
@@ -122,12 +130,12 @@ if __name__ == '__main__':
 
     evaluate = evaluate.map(map1)
 
-    # (movieY, movieA) => ((i, userX, ratingXY, ratingXA), (simYA, numPairsYA))
+    # (movieY, movieA) => ((i, userX, ratingXY, ratingXA), simYA)
     evaluate = evaluate.join(moviePairSimilarities)
 
     # (userX, movieY, ratingXY) => [(ratingXA, simYA)]
     def map2(row):
-        (movieY, movieA), ((i, userX, ratingXY, ratingXA), (simYA, numPairsYA)) = row
+        (movieY, movieA), ((i, userX, ratingXY, ratingXA), simYA) = row
         if i == 0:
             return (userX, movieY, ratingXY), [(ratingXA, simYA)]
         return (userX, movieA, ratingXY), [(ratingXA, simYA)]
@@ -190,3 +198,5 @@ if __name__ == '__main__':
     spark.stop()
     e = time.time()
     print("Time: %f s" % (e - s))
+# RMSE:  0.9510678724710572
+# Time: 143.767802 s

@@ -53,28 +53,28 @@ class CF(object):
         # nonzeros only, and, of course, their locations.
         self.Ybar = sparse.coo_matrix((self.Ybar_data[:, 2],
                                        (self.Ybar_data[:, 1], self.Ybar_data[:, 0])), (self.n_items, self.n_users))
-        # self.Ybar = self.Ybar.tocsr()
+        self.Ybar = self.Ybar.tocsr()
 
     def similarity(self):
-        # self.S = self.dist_func(self.Ybar.T)
-        self.S = np.zeros((self.n_users, self.n_users))
-        users = self.Ybar.col
-        items = self.Ybar.row
-        ratings = self.Ybar.data
-        for i in range(1, self.n_users):
-            self.S[i,i] = 1
-            for j in range(i+1, self.n_users):
-                ids_i = np.where(users == i)[0]  # indices in Y_data which user i rated
-                ids_j = np.where(users == j)[0]
-                items_rated_by_i = items[ids_i]
-                items_rated_by_j = items[ids_j]
-                item_reated_by_ij = np.intersect1d(items_rated_by_i, items_rated_by_j)
-                ids_i_pair = list(np.where(items[ids_i] == item)[0][0] for item in item_reated_by_ij)  # indices of ids_i include pair
-                ids_j_pair = list(np.where(items[ids_j] == item)[0][0] for item in item_reated_by_ij)
-                rating_i = ratings[ids_i][ids_i_pair]
-                ratings_j = ratings[ids_j][ids_j_pair]
-                if len(rating_i) and len(ratings_j):
-                    self.S[i,j] = self.S[j,i] = np.dot(rating_i, ratings_j) / (norm(rating_i, 2) * norm(ratings_j, 2))
+        self.S = self.dist_func(self.Ybar.T)
+        # self.S = np.zeros((self.n_users, self.n_users))
+        # users = self.Ybar.col
+        # items = self.Ybar.row
+        # ratings = self.Ybar.data
+        # for i in range(1, self.n_users):
+        #     self.S[i,i] = 1
+        #     for j in range(i+1, self.n_users):
+        #         ids_i = np.where(users == i)[0]  # indices in Y_data which user i rated
+        #         ids_j = np.where(users == j)[0]
+        #         items_rated_by_i = items[ids_i]
+        #         items_rated_by_j = items[ids_j]
+        #         item_reated_by_ij = np.intersect1d(items_rated_by_i, items_rated_by_j)
+        #         ids_i_pair = list(np.where(items[ids_i] == item)[0][0] for item in item_reated_by_ij)  # indices of ids_i include pair
+        #         ids_j_pair = list(np.where(items[ids_j] == item)[0][0] for item in item_reated_by_ij)
+        #         rating_i = ratings[ids_i][ids_i_pair]
+        #         ratings_j = ratings[ids_j][ids_j_pair]
+        #         if len(rating_i) and len(ratings_j):
+        #             self.S[i,j] = self.S[j,i] = np.dot(rating_i, ratings_j) / (norm(rating_i, 2) * norm(ratings_j, 2))
 
     def refresh(self):
         """
@@ -199,7 +199,8 @@ rate_test[:, :2] -= 1
 
 rs = CF(rate_train, k=30, uuCF=0)
 rs.fit()
-print(rs.S)
+print(rs.mu)
+print(rs.S[0,:10])
 
 n_tests = rate_test.shape[0]
 SE = 0  # squared error
