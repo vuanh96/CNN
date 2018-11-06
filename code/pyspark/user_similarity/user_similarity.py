@@ -35,23 +35,23 @@ spark = SparkSession \
         .getOrCreate()
 
 # Way 1:
-# rdd = spark.sparkContext.textFile("user_profiles/*.csv")
-# # mapping to user => [feature1, feature2,...]
-# user_features = rdd.map(lambda r: r.split(',')).map(lambda r: (int(r[0]), [int(val) for val in r[1:]]))
-# # pair: (user1, features1),(user2, features2)
-# user_pairs = user_features.cartesian(user_features).filter(lambda r: r[0][0] < r[1][0])
-# # (user1, user2), similarity
-# user_similarities = user_pairs.map(lambda row: (row[0][0], row[1][0], compute_cosine_similarity(row)))
-# user_similarities = user_similarities.filter(lambda row: row[2] != 0)  # filter pairs have similarity = 0
-#
-# print(user_similarities.take(5))
-#
-# # write user similarities
-# user_similarities.saveAsTextFile("user_similarities_calculated_way1")
-#
-# # load user similarities
-# user_similarities_load = spark.sparkContext.textFile("user_similarities_calculated_way1")
-# print(user_similarities_load.take(5))
+rdd = spark.sparkContext.textFile("user_profiles/*.csv")
+# mapping to user => [feature1, feature2,...]
+user_features = rdd.map(lambda r: r.split(',')).map(lambda r: (int(r[0]), [int(val) for val in r[1:]]))
+# pair: (user1, features1),(user2, features2)
+user_pairs = user_features.cartesian(user_features).filter(lambda r: r[0][0] < r[1][0])
+# (user1, user2), similarity
+user_similarities = user_pairs.map(lambda row: (row[0][0], row[1][0], compute_cosine_similarity(row)))
+user_similarities = user_similarities.filter(lambda row: row[2] != 0)  # filter pairs have similarity = 0
+
+print(user_similarities.take(5))
+
+# write user similarities
+user_similarities.saveAsTextFile("user_similarities_calculated_way1")
+
+# load user similarities
+user_similarities_load = spark.sparkContext.textFile("user_similarities_calculated_way1")
+print(user_similarities_load.take(5))
 
 # Way 2:
 sparse_mat = load_npz('user_profiles/user_profiles.npz').tocoo()

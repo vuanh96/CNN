@@ -1,0 +1,10 @@
+# split char between fields of csv file
+SPLIT_CSV=','
+# Number of users display
+# NUMBER_USERS=0
+# file path to data csv file (should be abs path: /home/abc/.../data.csv)
+DATA_FILE_PATH='data/avrpu.csv'
+# file path to users file who applied recommendation
+AFFECTED_USERS_FILE_PATH='data/affected_users.txt'
+# file path to users file who was not applied recommendation
+UNAFFECTED_USERS_FILE_PATH='data/unaffected_users.txt'

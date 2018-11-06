@@ -1,0 +1,63 @@
+.leftNagivation {
+    float: left;
+    background-color: #545454;
+    color: white;
+    width: 20%;
+    height: 98vh;
+    overflow: auto;
+    border: solid 1px black;
+    padding: 20px;
+}
+.header{
+    border: solid 1px black;
+    background-color: #989898;
+    overflow: auto;
+    height: fit-content;
+    width: 100%;
+    text-align: center;
+    /* display: inline-block; */
+}
+.upload{
+    float: left;
+    width: 100%;
+    margin-left: 20px;
+}
+.rightPanel{
+        overflow: auto;
+        height: 98vh;
+        border: solid 1px black
+}
+.periods {
+    display: inline-block;
+    margin-left: 20px;
+    width: 100px;
+    /* overflow: visible; */
+    margin-top: 20px;
+}
+._dash-undo-redo {
+    display: none;
+  }
+
+#duration_date {
+    width: 100%;
+    float: left;
+}
+.date_range {
+    width: 48%;
+    margin-left: 2%;
+    float: left;
+    /* margin-right: 20px; */
+}
+.hidden {
+    display: none;
+}
+.show {
+    display: unset;
+}
+#settings{
+    width: 50%;
+    float: left;
+}
+.clear {
+    clear: both;
+}

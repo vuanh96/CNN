@@ -27,7 +27,7 @@ class CF(object):
 
     def normalize_Y(self):
         users = self.Y_data[:, 0]  # all users - first col of the Y_data
-        self.Ybar_data = self.Y_data.copy()
+        self.Ybar_data = self.Y_data.copy().astype(np.float64)
         self.mu = np.zeros((self.n_users,))
         for n in range(self.n_users):
             # row indices of rating done by user n
@@ -107,9 +107,9 @@ class CF(object):
         r = self.Ybar[i, users_rated_i[a]]
         if normalized:
             # add a small number, for instance, 1e-8, to avoid dividing by 0
-            return (r * nearest_s)[0] / (np.abs(nearest_s).sum() + 1e-8)
+            return (r*nearest_s)[0] / (np.abs(nearest_s).sum() + 1e-8)
 
-        return (r * nearest_s)[0] / (np.abs(nearest_s).sum() + 1e-8) + self.mu[u]
+        return (r*nearest_s)[0] / (np.abs(nearest_s).sum() + 1e-8) + self.mu[u]
 
     def pred(self, u, i, normalized=1):
         """
@@ -176,7 +176,7 @@ s = time.time()
 r_cols = ['user_id', 'movie_id', 'rating', 'unix_timestamp']
 
 ratings_base = pd.read_csv('ml-100k/ub.base', sep='\t', names=r_cols, encoding='latin-1')
-ratings_test = pd.read_csv('ml-100k/ub.test', sep='\t', names=r_cols, encoding='latin-1')
+ratings_test = pd.read_csv('ml-100k/ub.test.1', sep='\t', names=r_cols, encoding='latin-1')
 
 rate_train = ratings_base.values
 rate_test = ratings_test.values
@@ -199,14 +199,15 @@ rate_test[:, :2] -= 1
 
 rs = CF(rate_train, k=30, uuCF=0)
 rs.fit()
-print(rs.mu)
-print(rs.S[0,:10])
+# print(type(rs.Ybar[0, 0]))
 
 n_tests = rate_test.shape[0]
+print(n_tests)
 SE = 0  # squared error
 for n in range(n_tests):
     pred = rs.pred(rate_test[n, 0], rate_test[n, 1], normalized=0)
     SE += (pred - rate_test[n, 2]) ** 2
+    # print((pred - rate_test[n, 2]) ** 2)
 
 RMSE = np.sqrt(SE / n_tests)
 print('Item-item CF, RMSE =', RMSE)
@@ -214,5 +215,6 @@ print('Item-item CF, RMSE =', RMSE)
 e = time.time()
 print("Time: %f s" % (e-s))
 
-# RMSE: 0.9867912132705384
-# Time: 7.799541 s
+# User-user CF, RMSE = 0.9750321876706277
+# Item-item CF, RMSE = 0.9560201956862231
+# Time: 13.699841 s
