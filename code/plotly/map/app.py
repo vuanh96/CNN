@@ -33,7 +33,7 @@ rs.fit()
 mapbox_access_token = 'pk.eyJ1IjoiamFja2x1byIsImEiOiJjajNlcnh3MzEwMHZtMzNueGw3NWw5ZXF5In0.fk8k06T96Ml9CLGgKmk81w'
 main_layout = dict(
     autosize=True,
-    height=500,
+    # height=500,
     margin=dict(
         l=30,
         r=30,
@@ -61,7 +61,7 @@ map_graph = dcc.Graph(id='map', figure=dict(
             type='scattermapbox',
             lat=users['LAT'],
             lon=users['LON'],
-            text=users['POST OFFICE CITY'],
+            name=users['POST OFFICE CITY'],
             marker=dict(
                 color=users['AGE'],
                 size=8,
@@ -192,7 +192,7 @@ def update_line_chart_user_rating(selected_row_indices):
         )
     ]
     layout = copy.deepcopy(main_layout)
-    layout['title'] = "Rating History Of User " + str(user_id)
+    layout['title'] = "Ratings History Of User " + str(user_id)
     figure = dict(data=data, layout=layout)
     return figure
 
@@ -206,19 +206,20 @@ def update_pie_chart_user_rating(selected_row_indices):
     ratings_by_user = ratings[ratings['USER ID'] == user_id]
     cnt_star = ratings_by_user.groupby('RATING')['USER ID'].count().reset_index()
 
-    fig = dict(
-        data=[
-            dict(
-                type='pie',
-                values=cnt_star['USER ID'],
-                labels=["{} ★".format(i) for i in cnt_star['RATING']],
-                name='Rating Of User',
-                hoverinfo='label+percent',
-                hole=.5,
-            )
-        ],
-        layout=dict(
-            title="Percentage of user ratings",
+    data = [
+        dict(
+            type='pie',
+            values=cnt_star['USER ID'],
+            labels=["{} ★".format(i) for i in cnt_star['RATING']],
+            name='Rating Of User',
+            hoverinfo='label+percent',
+            hole=.5,
+        )
+    ]
+    layout = copy.deepcopy(main_layout)
+    layout.update(
+        dict(
+            title="Percentage Of Ratings By User " + str(user_id),
             annotations=[
                 dict(
                     showarrow=False,
@@ -227,6 +228,7 @@ def update_pie_chart_user_rating(selected_row_indices):
             ]
         )
     )
+    fig = dict(data=data, layout=layout)
     return fig
 
 
