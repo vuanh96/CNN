@@ -422,7 +422,7 @@ def make_main_figure(well_statuses, well_types, year_slider,
             lat=dfff['Surface_latitude'],
             text=dfff['Well_Name'],
             customdata=dfff['API_WellNo'],
-            # name=WELL_TYPES[well_type],
+            name=WELL_TYPES[well_type],
             marker=dict(
                 size=4,
                 opacity=0.6,
