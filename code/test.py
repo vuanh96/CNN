@@ -1,7 +1,7 @@
 import pandas as pd
 from datetime import datetime
 #
-df = pd.DataFrame([(1,2,3),(4,5,6),(7,8,9)], columns=['A','B','C'])
+df = pd.DataFrame([(1,2,3),(4,5,6),(7,8,9)], columns=['A','B','C'], index=[6,7,8])
 
 
 # from datetime import datetime
@@ -12,6 +12,8 @@ df = pd.DataFrame([(1,2,3),(4,5,6),(7,8,9)], columns=['A','B','C'])
 
 # print(df.groupby(lambda idx: df.loc[idx]['A']%2).groups)
 
-a = dict()
-b = {1:'a', 2:'b'}
-print({}.update(b))
+# a = dict()
+# b = {1:'a', 2:'b'}
+# print({}.update(b))
+print(df.index)
+
