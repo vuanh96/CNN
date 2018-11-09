@@ -48,8 +48,8 @@
       <file leaf-file-name="app.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/plotly/map/app.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="20">
-              <caret line="224" column="36" lean-forward="true" selection-start-line="224" selection-start-column="36" selection-end-line="224" selection-end-column="36" />
+            <state relative-caret-position="1378">
+              <caret line="236" selection-start-line="236" selection-end-line="236" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -181,7 +181,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -210,6 +209,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -430,19 +430,17 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.52463055" visible="true" weight="0.2057101" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.5222222" visible="true" weight="0.2057101" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32901832" />
       <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.50104165" side_tool="true" weight="0.32943678" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32857144" />
-      <window_info active="true" anchor="bottom" x="0" y="23" width="1920" height="1017" id="Run" order="2" sideWeight="0.49895832" visible="true" weight="0.35555556" />
       <window_info anchor="bottom" id="Version Control" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Python Console" order="7" weight="0.32837406" />
-      <window_info id="Structure" order="1" sideWeight="0.47536945" side_tool="true" visible="true" weight="0.2057101" />
-      <window_info anchor="bottom" x="67" y="55" width="1853" height="1025" id="Terminal" order="8" sideWeight="0.49895832" weight="0.5005314" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.38363442" />
+      <window_info anchor="bottom" x="0" y="23" width="1920" height="1017" id="Run" order="2" sideWeight="0.49895832" weight="0.35555556" />
+      <window_info id="Structure" order="1" sideWeight="0.47777778" side_tool="true" visible="true" weight="0.2057101" />
+      <window_info anchor="bottom" x="67" y="55" width="1853" height="1025" id="Terminal" order="8" sideWeight="0.49895832" weight="0.5" />
       <window_info id="Favorites" order="2" show_stripe_button="false" sideWeight="0.5509868" side_tool="true" weight="0.15827338" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.38363442" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Docker" order="11" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="12" show_stripe_button="false" />
@@ -453,29 +451,30 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="right" id="SciView" order="4" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32857144" />
     </layout>
     <layout-to-restore>
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Docker" order="11" show_stripe_button="false" />
-      <window_info active="true" anchor="bottom" x="0" y="23" width="1920" height="1017" id="Run" order="2" sideWeight="0.49895832" visible="true" weight="0.37407014" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info id="Favorites" order="2" show_stripe_button="false" sideWeight="0.5509868" side_tool="true" weight="0.15827338" />
+      <window_info anchor="bottom" id="Database Changes" order="12" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="9" show_stripe_button="false" />
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.52682924" weight="0.33551913" />
       <window_info id="Structure" order="1" sideWeight="0.47317073" side_tool="true" weight="0.33546326" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32901832" />
-      <window_info anchor="bottom" id="Version Control" order="9" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info active="true" anchor="bottom" x="0" y="23" width="1920" height="1017" id="Run" order="2" sideWeight="0.49895832" visible="true" weight="0.37407014" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32943678" />
+      <window_info anchor="bottom" id="Python Console" order="7" weight="0.32901832" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.38363442" />
       <window_info anchor="right" id="Database" order="3" />
       <window_info anchor="bottom" x="67" y="55" width="1853" height="1025" id="Terminal" order="8" sideWeight="0.49895832" weight="0.039319873" />
       <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.50104165" side_tool="true" weight="0.32943678" />
-      <window_info anchor="bottom" id="Database Changes" order="12" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="right" id="SciView" order="4" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32943678" />
-      <window_info anchor="bottom" id="Python Console" order="7" weight="0.32901832" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info id="Favorites" order="2" show_stripe_button="false" sideWeight="0.5509868" side_tool="true" weight="0.15827338" />
     </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -624,71 +623,24 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3636">
           <caret line="207" column="65" selection-start-line="207" selection-start-column="65" selection-end-line="207" selection-end-column="65" />
-          <folding>
-            <element signature="e#0#19#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/pyspark/big_data/.gitignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="72">
-          <caret line="4" lean-forward="true" selection-start-line="4" selection-end-line="4" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/pyspark/big_data/.gitignore" />
     <entry file="file://$PROJECT_DIR$/pyspark/recommendation/nbcf_pyspark.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="198">
           <caret line="47" column="38" selection-start-line="47" selection-start-column="38" selection-end-line="47" selection-end-column="38" />
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/pyspark/big_data/Procfile">
+    <entry file="file://$PROJECT_DIR$/pyspark/big_data/Procfile" />
+    <entry file="file://$USER_HOME$/AppData/Local/Continuum/anaconda3/Lib/site-packages/datashader/transfer_functions.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Continuum/anaconda3/Lib/site-packages/datashader/transfer_functions.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#64#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/pyspark/big_data/app.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2119">
-          <caret line="101" column="15" selection-start-line="101" selection-start-column="15" selection-end-line="101" selection-end-column="15" />
-          <folding>
-            <element signature="e#17#28#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/pyspark/map/recommendation.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="119" lean-forward="true" selection-start-line="119" selection-end-line="119" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/pyspark/map/app.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="151">
-          <caret line="194" column="7" lean-forward="true" selection-start-line="194" selection-start-column="7" selection-end-line="194" selection-end-column="7" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/pyspark/big_data/app.py" />
+    <entry file="file://$PROJECT_DIR$/pyspark/map/recommendation.py" />
+    <entry file="file://$PROJECT_DIR$/pyspark/map/app.py" />
     <entry file="file://$PROJECT_DIR$/plotly/dash-oil-and-gas-demo-master/app.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1620" />
@@ -696,8 +648,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/plotly/map/app.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="20">
-          <caret line="224" column="36" lean-forward="true" selection-start-line="224" selection-start-column="36" selection-end-line="224" selection-end-column="36" />
+        <state relative-caret-position="1378">
+          <caret line="236" selection-start-line="236" selection-end-line="236" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
