@@ -21,7 +21,21 @@ app = dash.Dash()
 users = pd.read_csv('ml-100k/u.user.zipcode', header=0)
 columns_used = ['USER ID', 'AGE', 'GENDER', 'OCCUPATION', 'ZIP CODE', 'POST OFFICE CITY']
 
-items = pd.read_csv('ml-100k/u.item', sep='|', header=None)
+genres = ['unknown', 'Action', 'Adventure', 'Animation', "Children's", 'Comedy', 'Crime', 'Documentary', 'Drama',
+          'Fantasy', 'Film-Noir', 'Horror', 'Musical', 'Mystery', 'Romance ', 'Sci-Fi', 'Thriller', 'War', 'Western']
+
+
+def extract_genres(row):
+    list_genre = ""
+    for g in genres:
+        if row[g] == 1:
+            list_genre += g + ", "
+    return list_genre[:-2]
+
+
+items = pd.read_csv('ml-100k/u.item', sep='|', header=None,
+                    names=['MOVIE ID', 'MOVIE TITLE', 'RELEASE DATE', 'IDMb URL'] + genres)
+items['GENRES'] = items.apply(lambda row: extract_genres(row), axis=1)
 
 ratings = pd.read_csv('ml-100k/ub.base', sep='\t', header=None, names=['USER ID', 'MOVIE ID', 'RATING', 'TIME STAMP'])
 
@@ -61,7 +75,7 @@ map_graph = dcc.Graph(id='map', figure=dict(
             type='scattermapbox',
             lat=users['LAT'],
             lon=users['LON'],
-            name=users['POST OFFICE CITY'],
+            text=users['POST OFFICE CITY'],
             marker=dict(
                 color=users['AGE'],
                 size=8,
@@ -86,7 +100,7 @@ user_profile_table = dt.DataTable(
 
 movie_recommend_table = dt.DataTable(
     rows=[],
-    columns=['MOVIE ID', 'MOVIE TITLE'],
+    columns=['MOVIE ID', 'MOVIE TITLE', 'GENRES'],
     row_selectable=False,
     filterable=True,
     sortable=True,
@@ -112,10 +126,10 @@ app.layout = html.Div([
     html.Div([
         html.Div([
             user_profile_table
-        ], className='eight columns'),
+        ], className='seven columns'),
         html.Div([
             movie_recommend_table
-        ], className='four columns')
+        ], className='five columns')
     ], className='row'),
     html.Div([
         html.Div([
@@ -123,7 +137,7 @@ app.layout = html.Div([
         ], className='four columns'),
         html.Div([
             dcc.Graph(id='pie-chart-user-rating')
-        ], className='four columns')
+        ], className='eight columns')
     ], className='row')
 ], className='ten columns offset-by-one')
 
@@ -135,7 +149,7 @@ def update_text(hoverData):
     try:
         s = users[users['ZIP CODE'] == hoverData['points'][0]['customdata']]
         return html.H4(
-            "{} : {} users".format(s.iloc[0]['POST OFFICE CITY'], s.shape[0], ),
+            "{} : {} users".format(s.iat[0, 7], s.shape[0]),
             style={'color': 'red', 'display': 'inline'}
         )
     except:
@@ -148,25 +162,25 @@ def update_text(hoverData):
 def update_table_recommend(selected_row_indices):
     try:
         idx = selected_row_indices[0]
-        user_id = users.loc[idx]['USER ID']
+        user_id = users.loc[idx, 'USER ID']
         id_items_recommend = rs.recommend(user_id)[:10]
-        items_recommend = items[items[0].isin(id_items_recommend)]
-        return items_recommend.rename(columns={0: 'MOVIE ID', 1: 'MOVIE TITLE'}).to_dict("record")
+        items_recommend = items[items['MOVIE ID'].isin(id_items_recommend)]
+
+        return items_recommend.to_dict("record")
     except:
         return []
-
-
-def group_ratings_by_month(df, idx, col):
-    time = datetime.fromtimestamp(df.loc[idx][col])
-    return time.year, time.month
 
 
 @app.callback(
     Output('line-chart-user-rating', 'figure'),
     [Input('table-user-profile', 'selected_row_indices')])
 def update_line_chart_user_rating(selected_row_indices):
+    def group_ratings_by_month(df, idx, col):
+        time = datetime.fromtimestamp(df.loc[idx][col])
+        return time.year, time.month
+
     idx = selected_row_indices[0]
-    user_id = users.loc[idx]['USER ID']
+    user_id = users.loc[idx, 'USER ID']
     ratings_by_user = ratings[ratings['USER ID'] == user_id]
     ratings_by_month = \
         ratings_by_user.groupby(lambda idx: group_ratings_by_month(ratings_by_user, idx, 'TIME STAMP'))['RATING'] \
@@ -206,6 +220,7 @@ def update_pie_chart_user_rating(selected_row_indices):
     ratings_by_user = ratings[ratings['USER ID'] == user_id]
     cnt_star = ratings_by_user.groupby('RATING')['USER ID'].count().reset_index()
 
+    cnt_genres = items[items['MOVIE ID'].isin(ratings_by_user['MOVIE ID'])][genres].sum()
     data = [
         dict(
             type='pie',
@@ -214,6 +229,17 @@ def update_pie_chart_user_rating(selected_row_indices):
             name='Rating Of User',
             hoverinfo='label+percent',
             hole=.5,
+            domain={"x": [0, .48]},
+        ),
+        dict(
+            type='pie',
+            values=cnt_genres,
+            labels=cnt_genres.index,
+            name='Rating Of User',
+            hoverinfo='label+percent',
+            hole=.5,
+            domain={"x": [.52, 1]},
+
         )
     ]
     layout = copy.deepcopy(main_layout)
@@ -223,7 +249,21 @@ def update_pie_chart_user_rating(selected_row_indices):
             annotations=[
                 dict(
                     showarrow=False,
-                    text="",
+                    text="Star",
+                    font=dict(
+                        size=20
+                    ),
+                    x=.2,
+                    y=.5
+                ),
+                dict(
+                    showarrow=False,
+                    text="Genres",
+                    font=dict(
+                        size=20
+                    ),
+                    x=.8,
+                    y=.5
                 )
             ]
         )

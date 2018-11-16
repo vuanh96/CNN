@@ -21,3 +21,7 @@ git push origin --delete <branch> # delete remote branch
 
 git status
 git diff --statgit 
+
+# When need push/pull not synchronized
+git stash save # Stash the changes
+git stash pop # Reapply the local changes
