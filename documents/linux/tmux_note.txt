@@ -1,0 +1,16 @@
+tmux new -s <session_name>
+tmux ls
+tmux a -t <session_name> # attack session
+tmux kill-session -t <session_name>
+
+Ctrl+b c  # Tạo một cửa sổ mới
+Ctrl+b w  # Xem danh sách cửa sổ hiện tại
+Ctrl+b f  #　Tìm kiếm cửa sổ
+Ctrl+b ,  #　Đặt/Đổi tên cho cửa sổ
+Ctrl+b &  #　Đóng cửa sổ
+Ctrl+b %  # chia đôi màn hình theo chiều dọc
+Ctrl+b "  # chia đôi màn hình theo chiều ngang
+Ctrl+b <phím mũi tên>  # Di chuyển giữa các panel
+Ctrl+b q  # Hiện số thứ tự trên
+Ctrl+b x  # Xoá panel
+

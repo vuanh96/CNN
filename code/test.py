@@ -15,5 +15,7 @@ df = pd.DataFrame([(1,2,3),(4,5,6),(7,8,9)], columns=['A','B','C'], index=[6,7,8
 # a = dict()
 # b = {1:'a', 2:'b'}
 # print({}.update(b))
-print(df.index)
+# print(df.index)
+
+print("%10s %10.3f %10.3f" % ("Vuanh", 4.5, 6.7))
 

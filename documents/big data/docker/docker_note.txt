@@ -1,0 +1,29 @@
+# Pull a image from docker hub
+sudo docker pull <image_name>
+
+# Create new container 
+sudo docker run -v <forder_in_computer>:<forder_in_container> -p <port_in_computer>:<port_in_container> -it <image_name> /bin/bash
+-v : Thể hiện việc mount volume, dữ liệu từ thư mục từ máy thật có thể được truy cập từ thư mục của máy ảo.
+
+-p: Cổng mạng từ máy thật để dẫn tới cổng mạng của máy ảo đang chạy.
+
+-t: Chạy container và mở terminal bằng /bin/bash
+
+
+# Show information of kernel Ubuntu
+uname -a
+
+docker images: Liệt kê các images hiện có
+
+docker rmi {image_id/name}: Xóa một image
+
+docker ps: Liệt kê các container đang chạy
+
+docker ps -a: Liệt kê các container đã tắt
+
+docker rm -f {container_id/name}: Xóa một container
+
+docker start {new_container_name}: Khởi động một container
+
+docker exec -it {new_container_name} /bin/bash: Truy cập vào container đang chạy
+
